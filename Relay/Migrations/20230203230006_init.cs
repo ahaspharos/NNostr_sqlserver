@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Relay.Migrations
 {
-    public partial class Balances : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -13,7 +13,7 @@ namespace Relay.Migrations
                 name: "Balances",
                 columns: table => new
                 {
-                    PublicKey = table.Column<string>(type: "text", nullable: false),
+                    PublicKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CurrentBalance = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -22,12 +22,30 @@ namespace Relay.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    PublicKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Kind = table.Column<int>(type: "int", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Signature = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Deleted = table.Column<bool>(type: "bit", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BalanceTopups",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    BalanceId = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false)
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BalanceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -41,15 +59,35 @@ namespace Relay.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EventTags",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    EventId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    TagIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Data = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EventTags", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EventTags_Events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Events",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BalanceTransactions",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "text", nullable: false),
-                    BalanceId = table.Column<string>(type: "text", nullable: false),
-                    BalanceTopupId = table.Column<string>(type: "text", nullable: true),
-                    EventId = table.Column<string>(type: "text", nullable: true),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BalanceId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    BalanceTopupId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    EventId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Value = table.Column<long>(type: "bigint", nullable: false),
-                    Timestamp = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false)
+                    Timestamp = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -91,6 +129,11 @@ namespace Relay.Migrations
                 name: "IX_BalanceTransactions_EventId",
                 table: "BalanceTransactions",
                 column: "EventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventTags_EventId",
+                table: "EventTags",
+                column: "EventId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -99,7 +142,13 @@ namespace Relay.Migrations
                 name: "BalanceTransactions");
 
             migrationBuilder.DropTable(
+                name: "EventTags");
+
+            migrationBuilder.DropTable(
                 name: "BalanceTopups");
+
+            migrationBuilder.DropTable(
+                name: "Events");
 
             migrationBuilder.DropTable(
                 name: "Balances");

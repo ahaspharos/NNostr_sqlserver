@@ -1,8 +1,10 @@
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 using NNostr.Client.JsonConverters;
 
 namespace NNostr.Client
 {
+    [Table("Events")]
     public class NostrEvent: IEqualityComparer<NostrEvent>
     {
         [JsonPropertyName("id")]
@@ -19,7 +21,7 @@ namespace NNostr.Client
         [JsonConverter(typeof(StringEscaperJsonConverter))]
         public string Content { get; set; }
         
-        [JsonPropertyName("tags")]
+        [JsonPropertyName("tags")]       
         public List<NostrEventTag> Tags { get; set; }
         
         [JsonPropertyName("sig")]

@@ -1,8 +1,14 @@
 using System;
 using System.Collections.Generic;
+//using System.Data.Entity;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using NBitcoin;
+using Newtonsoft.Json;
 using NNostr.Client;
+using Relay.Models;
 
 namespace Relay.Data
 {
@@ -16,7 +22,7 @@ namespace Relay.Data
 
     public class BalanceTransaction
     {
-        public string Id { get; set; }  
+        public string Id { get; set; }
         public string BalanceId { get; set; }
         public string? BalanceTopupId { get; set; }
         public string? EventId { get; set; }
@@ -30,7 +36,7 @@ namespace Relay.Data
 
     public class BalanceTopup
     {
-        
+
         public string Id { get; set; }
         public string BalanceId { get; set; }
         public TopupStatus Status { get; set; }
@@ -43,11 +49,11 @@ namespace Relay.Data
             Pending,
             Complete,
             Expired,
-            
+
         }
     }
-    
-    
+
+
     public class RelayDbContext : DbContext
     {
         public DbSet<Balance> Balances { get; set; }
@@ -57,9 +63,12 @@ namespace Relay.Data
         public DbSet<RelayNostrEvent> Events { get; set; }
         public const string DatabaseConnectionStringName = "RelayDatabase";
 
-        public RelayDbContext(DbContextOptions<RelayDbContext> options):base(options)
+
+        public DbSet<Whitelist> Whitelist { get; set; }
+
+        public RelayDbContext(DbContextOptions<RelayDbContext> options) : base(options)
         {
-            
+
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -68,7 +77,26 @@ namespace Relay.Data
             modelBuilder.Entity<NostrEventTag>()
                 .HasOne(p => p.Event)
                 .WithMany(b => b.Tags);
-                     
+
+            
+
+            modelBuilder.Entity<NostrEventTag>()
+            .Property(p => p.Data)
+            .HasConversion(
+                v => JsonConvert.SerializeObject(v),
+                v => JsonConvert.DeserializeObject<List<string>>(v));
+
+            var valueComparer = new ValueComparer<List<string>>(
+            (c1, c2) => c1.SequenceEqual<string>(c2),
+            c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+            c => c.ToList());
+
+            modelBuilder
+            .Entity<NostrEventTag>()
+            .Property(e => e.Data)
+            .Metadata
+            .SetValueComparer(valueComparer);
+
         }
     }
 }

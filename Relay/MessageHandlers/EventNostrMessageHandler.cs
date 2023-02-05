@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
@@ -14,19 +16,21 @@ namespace Relay
 {
     public class EventNostrMessageHandler : INostrMessageHandler, IHostedService
     {
-        private readonly NostrEventService _nostrEventService;
+        private readonly NostrEventService _nostrEventService;        
         private readonly ILogger<EventNostrMessageHandler> _logger;
         private readonly StateManager _stateManager;
         private readonly IOptions<RelayOptions> _options;
+        private readonly RelayDbContext _context;
         private const string PREFIX = "EVENT";
 
         private readonly Channel<(string, string)> PendingMessages = Channel.CreateUnbounded<(string, string)>();
 
-        public EventNostrMessageHandler(NostrEventService nostrEventService,
+        public EventNostrMessageHandler(IDbContextFactory<RelayDbContext> dbContextFactory,NostrEventService nostrEventService,
             ILogger<EventNostrMessageHandler> logger,
             StateManager stateManager,
             IOptions<RelayOptions> options)
         {
+            _context = dbContextFactory.CreateDbContext();
             _nostrEventService = nostrEventService;
             _logger = logger;
             _stateManager = stateManager;
@@ -53,8 +57,9 @@ namespace Relay
                                 
                                 WriteOkMessage(evt.Item1, e.Id, false, $"pow: difficulty {count} is less than {_options.Value.Nip13Difficulty}");
                             }
-                        }else if (e.Verify())
+                        }else if (e.Verify() && _context.Whitelist.Any(a=>a.PubKey==e.PublicKey))
                         {
+
                             var added = await _nostrEventService.AddEvent(new[] {e});
                             if (_options.Value.EnableNip20)
                             {
@@ -78,7 +83,7 @@ namespace Relay
                         }
                         else if (_options.Value.EnableNip20)
                         {
-                            WriteOkMessage(evt.Item1, e.Id, false, "invalid: event could not be verified");
+                            WriteOkMessage(evt.Item1, e.Id, false, "invalid: event could not be verified or you're not athorized to use this relay");
                         }
                     }
                     catch (Exception exception)

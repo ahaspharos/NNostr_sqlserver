@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using NBitcoin;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Newtonsoft.Json.Linq;
 using NNostr.Client;
 using Relay.Data;
@@ -43,10 +44,11 @@ namespace Relay
                 {
                     throw new Exception("Database: Connection string not set");
                 }
-
-                builder.UseNpgsql(connString, optionsBuilder => { optionsBuilder.EnableRetryOnFailure(10); });
+                
+                builder.UseSqlServer(connString, optionsBuilder => { optionsBuilder.EnableRetryOnFailure(10); });                
                 builder.WithExpressionExpanding();
             });
+            services.AddRazorPages();            
             services.AddHostedService<MigrationHostedService>();
             services.AddHostedService(provider => provider.GetService<EventNostrMessageHandler>());
             services.AddHostedService(provider => provider.GetService<BTCPayServerService>());
@@ -66,7 +68,7 @@ namespace Relay
             services.AddSingleton<INostrMessageHandler, EventNostrMessageHandler>(provider =>
                 provider.GetService<EventNostrMessageHandler>());
             services.AddSingleton<INostrMessageHandler, RequestNostrMessageHandler>();
-            services.AddSingleton<IHostedService>(provider => provider.GetService<ConnectionManager>());
+            services.AddSingleton<IHostedService>(provider => provider.GetService<ConnectionManager>());            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,13 +78,18 @@ namespace Relay
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseRouting();
+            app.UseStaticFiles();
+            app.UseRouting();            
 
             app.UseWebSockets();
             app.UseMiddleware<WebsocketMiddleware>();
             app.UseMiddleware<Nip11Middleware>();
             app.UseMiddleware<RestMiddleware>();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+            });
         }
     }
 

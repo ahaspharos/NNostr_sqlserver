@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Relay", "Relay\Relay.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNostr.Client", "NNostr.Client\NNostr.Client.csproj", "{F2788609-DE89-4D25-BE31-1DEFD263007E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NNostr.Tests", "NNostr.Tests\NNostr.Tests.csproj", "{8CB3C821-354F-4CAA-90BE-D5DA201394D0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NNostr.Tests", "NNostr.Tests\NNostr.Tests.csproj", "{8CB3C821-354F-4CAA-90BE-D5DA201394D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

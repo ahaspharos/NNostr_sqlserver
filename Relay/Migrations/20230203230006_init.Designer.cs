@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Relay.Data;
 
@@ -11,9 +12,10 @@ using Relay.Data;
 namespace Relay.Migrations
 {
     [DbContext(typeof(RelayDbContext))]
-    partial class RelayDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230203230006_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -143,16 +145,6 @@ namespace Relay.Migrations
                     b.HasIndex("EventId");
 
                     b.ToTable("BalanceTransactions");
-                });
-
-            modelBuilder.Entity("Relay.Models.Whitelist", b =>
-                {
-                    b.Property<string>("PubKey")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("PubKey");
-
-                    b.ToTable("Whitelist");
                 });
 
             modelBuilder.Entity("Relay.RelayNostrEvent", b =>

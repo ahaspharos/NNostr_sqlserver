@@ -1,0 +1,19 @@
+﻿@page
+@model Relay.Pages.IndexModel
+@{
+}
+
+<h2>nostr.ahaspharos.de</h2>
+<p>
+    <img width="300" src="/content/images/nandu.svg"/>
+</p>
+<p>
+    add your pubkey to the relays whitelist
+</p>
+<p>
+    @ViewData["message"]
+</p>
+@using (Html.BeginForm(FormMethod.Post)){
+    <input name="pubkey" />
+    <input type="submit" />
+}

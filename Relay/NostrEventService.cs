@@ -181,9 +181,10 @@ namespace Relay
                 foreach (var eventsToReplace in replaceableEvents)
                 {
                     var dValue = eventsToReplace.GetTaggedData("d").FirstOrDefault() ?? string.Empty;
+
                     replacedEvents.AddRange(context.Events.Where(evt2 =>
-                        evt2.PublicKey.Equals(eventsToReplace.Id,
-                            StringComparison.InvariantCultureIgnoreCase) && 
+                        evt2.PublicKey==eventsToReplace.Id
+                        && 
                         eventsToReplace.Kind == evt2.Kind &&
                         dValue== (evt2.GetTaggedData("d").FirstOrDefault()??"") &&
                         evt2.CreatedAt < eventsToReplace.CreatedAt));
@@ -223,7 +224,8 @@ namespace Relay
                 });
             }
             eventResults.AddRange(evtsToSave.Select(@event => (@event.Id, true, "")));
-            await context.EventTags.AddRangeAsync(evtsToSave.SelectMany(e => e.Tags));
+            var tags = evtsToSave.SelectMany(e => e.Tags).Where(w=>w.TagIdentifier != null && w.Id != null && w.EventId != null && w.Data != null);
+            await context.EventTags.AddRangeAsync();
             await context.Events.AddRangeAsync(
                 evtsToSave.Select(@event => 
                     JsonSerializer.Deserialize<RelayNostrEvent>( JsonSerializer.Serialize(@event)))!);
@@ -264,7 +266,7 @@ namespace Relay
         private async Task<NostrEvent[]> GetFromDB(NostrSubscriptionFilter filter)
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
-            return await context.Events.Include(e => e.Tags).Where(e => !e.Deleted).Filter(filter).ToArrayAsync();
+            return context.Events.Include(e => e.Tags).Where(e => !e.Deleted).AsEnumerable().Filter(filter).ToArray();
         }
 
         public void RemoveFilter(string removedFilter)

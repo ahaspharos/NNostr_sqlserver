@@ -10,7 +10,7 @@ using NNostr.Client.JsonConverters;
 namespace NNostr.Client
 {
     [JsonConverter(typeof(NostrEventTagJsonConverter))]
-    public class NostrEventTag
+    public class NostrEventTag : IEqualityComparer<NostrEventTag>
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public string Id { get; set; }
@@ -27,6 +27,18 @@ namespace NNostr.Client
             {
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             });
+        }
+
+        public bool Equals(NostrEventTag? x, NostrEventTag? y)
+        {
+            if (ReferenceEquals(x, y)) return true;
+            if (x?.GetType() != y?.GetType()) return false;
+            return x?.Id == y?.Id;
+        }
+
+        public int GetHashCode(NostrEventTag obj)
+        {
+            return obj.Id.GetHashCode();
         }
     }
 }
