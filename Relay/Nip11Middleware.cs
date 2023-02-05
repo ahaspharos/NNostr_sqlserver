@@ -60,7 +60,7 @@ public class Nip11Middleware : IMiddleware
             var response = new Nip11Response()
             {
                 SupportedNips = nips.ToArray(),
-                Software = "https://github.com/Kukks/NNostr",
+                Software = "https://github.com/ahaspharos/NNostr_sqlserver",
                 Version = typeof(Startup).GetTypeInfo().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()
                     ?.Version
             };
