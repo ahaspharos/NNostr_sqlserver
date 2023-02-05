@@ -6,3 +6,5 @@ riderModule.iml
 .vs/NNostr/DesignTimeBuild
 .vs
 .idea
+/Relay/Properties/PublishProfiles/IISProfile.pubxml
+*.user
