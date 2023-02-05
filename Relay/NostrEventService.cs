@@ -184,7 +184,7 @@ namespace Relay
 
                     replacedEvents.AddRange(context.Events.Where(evt2 =>
                         evt2.PublicKey==eventsToReplace.Id
-                        && 
+                        ).AsEnumerable().Where(evt2=>
                         eventsToReplace.Kind == evt2.Kind &&
                         dValue== (evt2.GetTaggedData("d").FirstOrDefault()??"") &&
                         evt2.CreatedAt < eventsToReplace.CreatedAt));
