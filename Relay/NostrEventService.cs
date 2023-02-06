@@ -164,8 +164,7 @@ namespace Relay
                 foreach (var eventsToReplace in replaceableEvents)
                 {
                     replacedEvents.AddRange(context.Events.Where(evt2 =>
-                        evt2.PublicKey.Equals(eventsToReplace.Id,
-                            StringComparison.InvariantCultureIgnoreCase) && eventsToReplace.Kind == evt2.Kind &&
+                        evt2.PublicKey==eventsToReplace.Id &&  eventsToReplace.Kind == evt2.Kind &&
                         evt2.CreatedAt < eventsToReplace.CreatedAt));
                 }
 
